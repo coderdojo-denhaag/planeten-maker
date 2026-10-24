@@ -15,7 +15,7 @@ MODEL_TEKST = os.getenv(
 
 MODEL_AFBEELDING = os.getenv(
     "OPENROUTER_MODEL_AFBEELDING",
-    "bytedance-seed/seedream-4.5"
+    "openai/gpt-image-2"
 )
 
 BASIS_URL = "https://openrouter.ai/api/v1"
