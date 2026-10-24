@@ -81,22 +81,34 @@ def maak_afbeelding(opdracht):
         },
         json={
             "model": MODEL_AFBEELDING,
-            "prompt": opdracht,
-            "aspect_ratio": "16:9",
-            "resolution": "1K"
+            "prompt": opdracht
         },
         timeout=180
     )
 
-    antwoord.raise_for_status()
-    gegevens = antwoord.json()
+    # Toon de echte foutmelding als OpenRouter het verzoek afwijst.
+    if not antwoord.ok:
+        raise RuntimeError(
+            f"OpenRouter afbeeldingsfout ({antwoord.status_code}): "
+            f"{antwoord.text}"
+        )
 
-    afbeelding_data = gegevens["data"][0]["b64_json"]
+    gegevens = antwoord.json()
+    afbeeldingen = gegevens.get("data", [])
+
+    if not afbeeldingen or not afbeeldingen[0].get("b64_json"):
+        raise RuntimeError(
+            f"Geen afbeeldingsgegevens ontvangen: {gegevens}"
+        )
+
+    afbeelding_data = afbeeldingen[0]["b64_json"]
     afbeeldings_bytes = base64.b64decode(afbeelding_data)
 
     bestandsnaam = "mijn_planeet.png"
 
     with open(bestandsnaam, "wb") as bestand:
         bestand.write(afbeeldings_bytes)
+
+    print("Kosten afbeelding:", gegevens.get("usage", {}).get("cost", "onbekend"))
 
     return bestandsnaam
